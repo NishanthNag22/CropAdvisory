@@ -1,0 +1,30 @@
+
+[
+  {
+    "id": "TOM001",
+    "topic": "soil_pH",
+    "crop": "tomato",
+    "guidance": "Tomatoes generally grow well in slightly acidic soil. The suitable pH range depends on the production system, soil conditions, and local agricultural recommendations.",
+    "safety_note": "Do not recommend lime or sulfur application based only on pH. Confirm the soil test, local recommendations, and amendment requirements first.",
+    "source": "Agricultural guidance source to be verified",
+    "verified": false
+  },
+  {
+    "id": "TOM002",
+    "topic": "soil_moisture",
+    "crop": "tomato",
+    "guidance": "Tomato plants require adequate soil moisture, but both water stress and excessive moisture can negatively affect plant health.",
+    "safety_note": "Interpret moisture sensor readings using sensor calibration, soil type, root-zone depth, and crop growth stage.",
+    "source": "Agricultural guidance source to be verified",
+    "verified": false
+  },
+  {
+    "id": "TOM003",
+    "topic": "temperature",
+    "crop": "tomato",
+    "guidance": "Temperature affects tomato growth, flowering, fruit set, and development. Recommendations should account for the crop growth stage and local growing conditions.",
+    "safety_note": "Do not prescribe a specific heat-management action without checking crop stage and verified local guidance.",
+    "source": "Agricultural guidance source to be verified",
+    "verified": false
+  }
+]
