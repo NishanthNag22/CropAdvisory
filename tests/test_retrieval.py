@@ -64,3 +64,52 @@ def test_retrieval_returns_results():
     assert all("topic" in result for result in results)
     assert all("guidance" in result for result in results)
     assert all("score" in result for result in results)
+
+
+def test_retrieval_preserves_source_url():
+    entries = load_knowledge()
+    model = FakeModel()
+    index, documents = build_index(entries, model)
+
+    results = retrieve(
+        "What should I check for tomato plants?",
+        entries,
+        model,
+        index,
+        documents,
+        top_k=2
+    )
+
+    assert len(results) > 0
+    assert all("source_url" in result for result in results)
+
+    for result in results:
+        original = next(
+            entry for entry in entries
+            if entry["topic"] == result["topic"]
+        )
+        assert result["source_url"] == original.get("source_url")
+
+
+def test_retrieval_preserves_verification_status():
+    entries = load_knowledge()
+    model = FakeModel()
+    index, documents = build_index(entries, model)
+
+    results = retrieve(
+        "What should I check for tomato plants?",
+        entries,
+        model,
+        index,
+        documents,
+        top_k=2
+    )
+
+    assert len(results) > 0
+
+    for result in results:
+        original = next(
+            entry for entry in entries
+            if entry["topic"] == result["topic"]
+        )
+        assert result["verified"] == original.get("verified", False)
