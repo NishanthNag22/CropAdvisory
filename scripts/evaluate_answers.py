@@ -66,12 +66,12 @@ Give a clear, concise answer.
     return response.json()["message"]["content"]
 
 
+
 def evaluate_answer(case, answer, results):
     answer_lower = answer.lower()
 
     expected_topics = set(case["expected_topics"])
     retrieved_topics = {item["topic"] for item in results}
-
     topic_match = bool(expected_topics & retrieved_topics)
 
     phrase_results = {
@@ -84,18 +84,41 @@ def evaluate_answer(case, answer, results):
         for claim in case.get("forbidden_claims", [])
     }
 
-    urls_present = all(
+    urls_present = bool(results) and all(
         item.get("source_url")
         for item in results
+    )
+
+    # Preliminary heuristic: measure how much of the evidence's
+    # distinctive vocabulary also appears in the generated answer.
+    evidence_terms = set()
+
+    for item in results:
+        text = f"{item.get('topic', '')} {item.get('guidance', '')}"
+        for word in text.lower().split():
+            cleaned = word.strip(".,;:!?()[]{}\"'")
+            if len(cleaned) >= 5:
+                evidence_terms.add(cleaned)
+
+    answer_terms = set()
+    for word in answer_lower.split():
+        cleaned = word.strip(".,;:!?()[]{}\"'")
+        if len(cleaned) >= 5:
+            answer_terms.add(cleaned)
+
+    evidence_term_coverage = (
+        len(evidence_terms & answer_terms) / len(evidence_terms)
+        if evidence_terms
+        else 0.0
     )
 
     return {
         "topic_match": topic_match,
         "required_phrases": phrase_results,
         "forbidden_claims": forbidden_results,
-        "source_urls_present": urls_present
+        "source_urls_present": urls_present,
+        "evidence_term_coverage": round(evidence_term_coverage, 3)
     }
-
 
 def main():
     cases = load_cases()
@@ -158,7 +181,10 @@ def main():
         print(f"Required phrases: {checks['required_phrases']}")
         print(f"Forbidden claims found: {checks['forbidden_claims']}")
         print(f"Source URLs present: {checks['source_urls_present']}")
-
+        print(
+            f"Evidence term coverage (heuristic): "
+            f"{checks['evidence_term_coverage']:.1%}"
+        )
         phrases_pass = all(checks["required_phrases"].values())
         forbidden_pass = not any(checks["forbidden_claims"].values())
 
