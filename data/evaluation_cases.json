@@ -1,0 +1,19 @@
+
+[
+  {
+    "question": "What soil pH is suitable for tomatoes?",
+    "expected_topics": ["soil_pH"]
+  },
+  {
+    "question": "What should I check before changing tomato irrigation?",
+    "expected_topics": ["soil_moisture"]
+  },
+  {
+    "question": "What are signs of nitrogen deficiency in tomato plants?",
+    "expected_topics": ["nitrogen_deficiency"]
+  },
+  {
+    "question": "Do yellow leaves alone confirm nitrogen deficiency?",
+    "expected_topics": ["nitrogen_deficiency"]
+  }
+]
