@@ -1,30 +1,24 @@
 
 [
   {
-    "id": "TOM001",
     "topic": "soil_pH",
-    "crop": "tomato",
-    "guidance": "Tomatoes generally grow well in slightly acidic soil. The suitable pH range depends on the production system, soil conditions, and local agricultural recommendations.",
-    "safety_note": "Do not recommend lime or sulfur application based only on pH. Confirm the soil test, local recommendations, and amendment requirements first.",
-    "source": "Agricultural guidance source to be verified",
-    "verified": false
+    "guidance": "Tamil Nadu Agricultural University lists a soil pH range of 6.5 to 7.5 for tomato cultivation in its general tomato soil guidance. Check the local soil-test result before deciding whether any pH correction is needed.",
+    "source": "Tamil Nadu Agricultural University - Tomato Soil Requirements",
+    "source_url": "https://agritech.tnau.ac.in/horticulture/horti_vegetables_tomato_Soil.html",
+    "verified": true
   },
   {
-    "id": "TOM002",
     "topic": "soil_moisture",
-    "crop": "tomato",
-    "guidance": "Tomato plants require adequate soil moisture, but both water stress and excessive moisture can negatively affect plant health.",
-    "safety_note": "Interpret moisture sensor readings using sensor calibration, soil type, root-zone depth, and crop growth stage.",
-    "source": "Agricultural guidance source to be verified",
-    "verified": false
+    "guidance": "Tomatoes need careful irrigation with sufficient water at appropriate times. TNAU notes that maintaining an even water supply is important. Check actual soil moisture and drainage before changing irrigation; the appropriate schedule depends on growing conditions.",
+    "source": "Tamil Nadu Agricultural University - Organic Tomato Water Management",
+    "source_url": "https://www.agritech.tnau.ac.in/org_farm/orgfarm_tomato_water.html",
+    "verified": true
   },
   {
-    "id": "TOM003",
-    "topic": "temperature",
-    "crop": "tomato",
-    "guidance": "Temperature affects tomato growth, flowering, fruit set, and development. Recommendations should account for the crop growth stage and local growing conditions.",
-    "safety_note": "Do not prescribe a specific heat-management action without checking crop stage and verified local guidance.",
-    "source": "Agricultural guidance source to be verified",
-    "verified": false
+    "topic": "nitrogen_deficiency",
+    "guidance": "TNAU describes nitrogen deficiency in tomato as restricted shoot growth and spindly plants, with older leaves initially turning yellowish-green. Yellow leaves alone do not confirm nitrogen deficiency. Check other symptoms and obtain a soil or plant nutrient assessment before deciding on treatment.",
+    "source": "Tamil Nadu Agricultural University - Nitrogen Deficiency in Tomato",
+    "source_url": "https://agritech.tnau.ac.in/horticulture/plant_nutri/tomato_nitro.html",
+    "verified": true
   }
 ]
