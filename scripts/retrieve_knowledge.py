@@ -36,6 +36,7 @@ def build_index(entries, model):
     return index, documents
 
 
+
 def retrieve(query, entries, model, index, documents, top_k=2):
     query_embedding = model.encode(
         [query],
@@ -57,6 +58,7 @@ def retrieve(query, entries, model, index, documents, top_k=2):
             "topic": entries[idx]["topic"],
             "guidance": entries[idx]["guidance"],
             "source": entries[idx].get("source", "Unknown"),
+            "source_url": entries[idx].get("source_url"),
             "verified": entries[idx].get("verified", False)
         })
 
