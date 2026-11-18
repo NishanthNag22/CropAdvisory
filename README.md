@@ -31,14 +31,14 @@ The browser, evidence files and application assets run locally. Model and option
 
 ## What is implemented
 
-- Manual sensor inputs with finite-number and range validation: calibrated soil moisture **% VWC**, air temperature **°C**, and soil pH. Missing readings remain missing.
-- Crop, region, soil type, growth stage, symptoms and farmer question form one structured model input.
-- Crop-filtered retrieval preserves sources, regional scope and review dates. The default keyword/topic baseline requires no model download. An optional MiniLM + FAISS backend uses cached local model files.
-- Local quantized model inference through Ollama; concise and structured prompt variants.
+- Manual and CSV sensor inputs with timestamp/calibration/fault states, unit conversion (Fahrenheit and fractional VWC), stale/future checks, and preservation of raw measurements for audit. Unusable readings are withheld; missing readings remain missing.
+- Crop, region, season, production system, soil type, growth stage, symptoms and offline weather snapshots form the model context. Rainfall, forecast rainfall and humidity include timestamp/source metadata.
+- Crop-filtered retrieval screens region, season, production system and date metadata. Explicit mismatches/expired sources are excluded and unknown metadata is disclosed. It preserves sources, regional scope and review dates. The default keyword/topic baseline requires no model download. An optional MiniLM + FAISS backend uses cached local model files.
+- Local quantized model inference through Ollama; structured JSON and an unstructured prose input baseline with shared output instructions, plus a separate concise option.
 - Claim-level screening: rules reject unsupported dosages and narrow contradictions; a local-model reviewer assesses paraphrased claims against supplied evidence. Unassessed and unsupported claims are withheld. A failed reviewer falls back to source guidance.
-- Hindi, Kannada, Tamil and Telugu output with numerical, evidence-label and target-script checks. Original English remains visible.
-- Local web interface, JSON export, CLI, CSV sensor-log ingestion, benchmark runner and human review sheet.
-- Tests, CI configuration and documented evaluation limitations.
+- Hindi, Kannada, Tamil and Telugu output with number/label/script/unit checks and a local-model semantic assessment of crop names, conditions, negation, warnings and uncertainty. Failed translation is withheld; original English remains visible. These are fallible automated assessments, not human validation.
+- Local web interface, JSON export, CLI and CSV ingestion, including sensor-ID-based suspected stuck/out-of-order detection. Benchmark arms include English-then-translate and research-only direct multilingual generation. Resource monitoring, statistical analysis, reviewer imports and offline probes are included.
+- Tests, CI configuration, blank expert-review forms and validated annotation import, plus documented evaluation limitations.
 
 ## Supported evidence coverage
 
@@ -49,7 +49,7 @@ The browser, evidence files and application assets run locally. Model and option
 | Wheat | Irrigation, growth stages, soil-test-led nutrition | TNAU guidance, Tamil Nadu |
 | Cotton | Irrigation and critical growth stages | Irrigated cotton, Tamil Nadu |
 
-The bundled knowledge base is deliberately small. Multi-crop support does **not** mean complete coverage of every disease, region or crop condition. Temperature thresholds and general moisture targets are absent. The system must abstain when its references do not cover a question. Region is context for applicability checks, not a claim of validated recommendations for that region. Uncalibrated raw sensor percentages cannot be substituted for VWC.
+The bundled knowledge base is deliberately small. Multi-crop support does **not** mean complete coverage of every disease, region or crop condition. Temperature thresholds and general moisture targets are absent. Unknown publication dates or season applicability remain explicit; a metadata match does not establish field validity. The system must abstain when its references do not cover a question. Region is context for applicability checks, not a claim of validated recommendations for that region. Uncalibrated raw sensor percentages cannot be substituted for VWC.
 
 ## Command line and CSV logs
 
@@ -95,15 +95,15 @@ python -m pytest -q
 python scripts/benchmark.py
 ```
 
-The last command evaluates the evidence-only baseline across the bundled cases and both prompt configuration labels. Since no LLM is used, those two labels do not demonstrate a prompt-quality difference.
+The last command evaluates the evidence-only baseline on the fixed evaluation split of the versioned synthetic cases and both input-representation labels. Since no LLM is used, those labels do not demonstrate a prompt-quality difference. Expert review is pending and explicitly recorded in the dataset metadata.
 
 For actual quantization comparisons, install **different quantizations of the same base model** in Ollama under distinct local names, then run:
 
 ```bash
-python scripts/benchmark.py --models crop-q4 crop-q8 --languages en hi --styles concise structured --repeats 3 --output reports/quantization
+python scripts/benchmark.py --models crop-fp16 crop-q8 crop-q4 --languages en hi --styles structured unstructured --strategies translate direct --repeats 3 --output reports/quantization
 ```
 
-`crop-q4` and `crop-q8` are example local aliases, not pre-existing downloadable tags. See [evaluation guide](docs/EVALUATION.md) for GGUF setup, measurements and human scoring. Failures stay failures; the tool does not substitute generated results when a model is missing. JSON output includes installed-model metadata, inference counters, wall latency and loaded-model memory information. CSV output includes measurements and **blank** human review fields.
+`crop-fp16`, `crop-q4` and `crop-q8` are example local aliases, not pre-existing downloadable tags. See [evaluation guide](docs/EVALUATION.md) for GGUF setup, measurements and human scoring. Failures stay failures; the tool does not substitute generated results when a model is missing. JSON output includes installed-model metadata, inference counters, wall latency and loaded-model memory information. CSV output includes measurements and **blank** human review fields.
 
 ## Configuration
 
@@ -121,5 +121,6 @@ The UI's model field can override `OLLAMA_MODEL`. The app binds to localhost. In
 - [Architecture and API](docs/ARCHITECTURE.md)
 - [Evaluation protocol and current evidence](docs/EVALUATION.md)
 - [Source provenance and knowledge extension](docs/SOURCES.md)
+- [Paper-to-implementation coverage](docs/PAPER_IMPLEMENTATION.md)
 
 Automated support judgements and translation checks can fail. They are not proof of agronomic correctness. Review claims with an agronomist and translations with a fluent speaker before real-world decisions.

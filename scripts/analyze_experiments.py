@@ -56,14 +56,16 @@ def human_summary(reviews):
 
 
 def agreement(reviews):
-    indexed=defaultdict(dict)
-    context=('case','model','language','prompt_style','strategy','repeat')
-    for r in reviews:
-        if r['correct'] is not None:indexed[r['reviewer']][tuple(r.get(k,'') for k in context)]=r['correct']
     results=[]
-    for a,b in itertools.combinations(sorted(indexed),2):
-        keys=sorted(set(indexed[a])&set(indexed[b]))
-        if keys:results.append({'reviewers':[a,b],'shared_outputs':len(keys),'correctness_cohen_kappa':cohen_kappa([indexed[a][k] for k in keys],[indexed[b][k] for k in keys])})
+    context=('case','model','language','prompt_style','strategy','repeat')
+    for metric in ('correct','translation_fidelity_1_to_5'):
+        indexed=defaultdict(dict)
+        for r in reviews:
+            if r.get(metric) is not None:indexed[r['reviewer']][tuple(r.get(k,'') for k in context)]=r[metric]
+        for a,b in itertools.combinations(sorted(indexed),2):
+            keys=sorted(set(indexed[a])&set(indexed[b]))
+            if keys:results.append({'reviewers':[a,b],'metric':metric,'shared_outputs':len(keys),
+                'unweighted_cohen_kappa':cohen_kappa([indexed[a][k] for k in keys],[indexed[b][k] for k in keys])})
     return results
 
 

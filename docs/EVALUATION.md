@@ -1,65 +1,115 @@
-# Evaluation protocol
+# Evaluation protocol and commands
 
-## Completed checks in this development environment
+## Verified software checks
 
-- 62 automated tests passed. They cover input validation, crop isolation, claim screening, translation guards, sensor CSV handling and HTTP integration. See the repository test run for the current count.
-- Four illustrative sensor CSV rows processed successfully in English evidence-only mode.
-- Twelve hand-authored pipeline cases retrieved all expected topics (including expected abstention for uncovered questions), with no cross-crop records, in the lexical evidence-only baseline.
-- Both prompt configuration labels ran in the baseline, but evidence-only mode does not use those prompts. These runs cannot establish prompt-engineering effectiveness.
-- Python compilation and JavaScript syntax checks passed.
-- Browser visual testing was blocked: the remote browser could not reach the workspace server, and the workspace Chromium process could not create its Unix socket. HTTP integration checks are used; no successful visual-rendering check is claimed.
+The expanded implementation passes **114 automated tests**. Tests cover measurement conversion and quality, source applicability, translation withholding, prompt representation, resource reporting, statistics, dataset provenance, offline client guards, and HTTP integration.
 
-These are software checks on a small authored test set. They are not independent agronomic validation and must not be reported as "100% crop advisory accuracy".
+An evidence-only smoke run completed all **13 cases in the evaluation split**, for both structured and unstructured configuration labels. It retrieved the expected topics or abstained as specified. Evidence-only mode makes no LLM call: these runs test plumbing and source selection, **not prompt quality or agronomic accuracy**.
 
-## Not measured here
+CSV ingestion, analysis export and the loopback-only evidence preview also completed. The environment did not permit inspecting network interfaces; the offline report correctly records unknown adapter state and `network_isolation_verified: false`.
 
-Ollama and model weights were not installed on the development machine. No actual model generation latency, translation fidelity, quantization comparison, peak RAM/VRAM, semantic embedding retrieval quality or physical sensor accuracy was measured. The benchmark scripts generate these results when run on a provisioned target laptop. No results are prefilled.
+No actual LLM generation, semantic translation quality, quantization quality, physical sensor accuracy, agronomist ratings or bilingual ratings have been measured here. The direct-generation and semantic-review tests use explicit model-response fixtures. A model judge's support labels are not independent expert ground truth. The earlier visual-browser check was blocked by the development environment.
 
-## Quantization setup
+## Setup
 
-Use the same base model and training revision for each quantization. Download appropriate GGUF files from the model publisher while online. Check licences and publisher checksums. For example, create two local Ollama models with distinct Modelfiles:
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pip install -r requirements-analysis.txt
+python -m pytest -q
+```
+
+The application itself still requires only Python's standard library for lexical retrieval. Optional semantic retrieval uses `requirements-semantic.txt` and preinstalled weights.
+
+## 1. Prepare and freeze cases
+
+`data/research_cases.json` contains 20 synthetic authored cases, version 1.0.0, with seven development and thirteen evaluation cases. Categories include routine use, missing inputs, stale readings, faulty probes, unit conversion, stale weather, unfamiliar regions, boundary values and adversarial questions.
+
+Each case includes a draft rubric and `expert_reviewed: false`. Reference answers are null until an agronomist supplies them. A case may be marked reviewed only with reviewer provenance. These fixed splits were inspected during implementation and therefore cannot be sold as an untouched, independent blind benchmark. Add an independently reviewed held-out set before publication claims.
+
+Export blank case-review forms and import annotations supplied by an agronomist:
+
+```bash
+python scripts/review_dataset.py export data/research_cases.json --output reports/case-review.csv
+python scripts/review_dataset.py import data/research_cases.json --annotations reports/case-review.csv --output reports/expert-reviewed-cases.json
+```
+
+A decision requires reviewer identity and a review date. Approval additionally requires a reference answer, required-point rubric and source URLs. The importer validates completeness and provenance; it cannot verify credentials or establish that a real expert performed the work. Blank forms leave review status pending. The original dataset is unchanged unless you explicitly choose to replace it.
+
+Tune prompts on development cases. Hash and freeze an independent evaluation dataset before measuring final quality. Do not edit its answers or prompts after seeing final scores without reporting that change.
+
+## 2. Install matched model precision variants
+
+Use the same base model, training revision and tokenizer for a higher-precision baseline and at least two quantized variants. Create local Ollama aliases from appropriate GGUF files:
 
 ```text
-FROM /absolute/path/to/same-base-model.Q4_K_M.gguf
+FROM /absolute/path/to/same-base.F16.gguf
 ```
 
 ```text
-FROM /absolute/path/to/same-base-model.Q8_0.gguf
+FROM /absolute/path/to/same-base.Q8_0.gguf
+```
+
+```text
+FROM /absolute/path/to/same-base.Q4_K_M.gguf
 ```
 
 ```bash
-ollama create crop-q4 -f Modelfile.q4
+ollama create crop-fp16 -f Modelfile.fp16
 ollama create crop-q8 -f Modelfile.q8
-python scripts/benchmark.py --models crop-q4 crop-q8 --languages en hi --styles concise structured --repeats 3 --output reports/quantization
+ollama create crop-q4 -f Modelfile.q4
 ```
 
-Use file paths that exist on your computer. Model aliases in the commands are examples. Compare Q4 and Q8 only when the underlying model, context length, prompt, input and software are otherwise held constant.
+These are example local aliases and file paths, not published downloadable model tags. Use a model that fits the target laptop. Record exact revision, licence, file hash, CPU/GPU, RAM, OS and runtime. Ollama metadata is collected automatically; optional `--model-files alias=/path/to/file.gguf` computes file hashes and sizes.
 
-Record laptop CPU/GPU and RAM, OS, Ollama version, exact model revision and quantization, model file hash, and whether CPU or GPU inference is used. Run without internet after installing resources to demonstrate offline operation. Keep other workloads stable. Separate a cold first load from later warm runs in analysis; the saved per-run results retain repeat indices and Ollama load-duration counters.
+## 3. Run comparisons
 
-## What the runner records
+```bash
+python scripts/benchmark.py --models crop-fp16 crop-q8 crop-q4 --languages en hi --styles structured unstructured --strategies translate direct --repeats 3 --warmup-runs 1 --split evaluation --output reports/quantization
+```
 
-- End-to-end wall latency, including retrieval, generation, claim screening and any translation.
-- Generation throughput from Ollama `eval_count / eval_duration`, with duration converted from nanoseconds. This metric covers the first generation call, not the verifier or translator.
-- Installed-model metadata and loaded-model information from Ollama `/api/tags` and `/api/ps`, when available. Quantization details appear in model metadata. Loaded `size` and `size_vram` are **not peak whole-system RAM**. Use OS process/performance monitoring separately for peak RAM/VRAM.
-- Retrieved topics, crop isolation, generated/screened answers, support assessments and translation structural checks.
-- Exact output consistency across repeats, which is a reproducibility measure, not correctness.
-- Errors as errors, without converting missing-model runs into success scores. Out-of-coverage cases can abstain without calling a model; these are counted separately as abstentions, not generated advisories.
+For Hindi/Kannada/Tamil/Telugu comparisons, name the languages explicitly using `hi kn ta te`. The `direct` arm is a research arm; the normal UI continues to use English-then-translate. Direct output has no independently generated English source, so assess its adequacy against the case rubric. Do not pretend it has a measured translation-equivalence score.
 
-The runner exports `results.json`, `measurements.csv` and `human_review.csv`. Human scores remain blank until a reviewer supplies them.
+The structured/unstructured arms carry the same normalized observations, source evidence, grounding rules and output instructions. The separate concise option changes output instructions and is not the primary input-format ablation.
 
-## Human evaluation
+Warm-up attempts are saved separately and excluded from scored rows. A zero-warmup run is not automatically a verified cold run: unload models and record initial runtime state if a true cold-start comparison is required. Hold decoding options constant; current settings are temperature 0, seed 42, context 4096 and maximum generated tokens 800.
 
-Have an agronomist assess factual correctness, local applicability, actionability and missing context for every case. Rate correctness and usefulness from 1 (unusable) to 5 (fully appropriate). Have a fluent regional-language reviewer compare each translation against English, especially negation, quantities, units, qualifiers and evidence labels. Rate fidelity 1–5 and separately mark whether negations were preserved.
+### Memory and energy
 
-Automatic number, evidence-label and script checks cannot establish translation fidelity. Source vocabulary overlap cannot prove factual support. A source URL is not a source-entailment metric. Model support judgements can share the generator's mistakes.
+Pass Ollama process IDs so the monitor includes its runner children:
 
-Expand cases using independently reviewed field scenarios, including dry/wet readings, out-of-range inputs, missing calibration, unfamiliar regions, unsupported disease/treatment questions and prompt-injection attempts. Avoid using the same cases to tune prompts and to claim generalization.
+```bash
+python scripts/benchmark.py --models crop-q4 --monitor-pids 12345 --output reports/memory
+```
 
-## Suggested report table
+Replace `12345` with the real server PID. The client process is always included. Without an Ollama PID, sampled RSS is client-only and must not be described as inference-server RAM. Install `psutil` for process memory; optional NVIDIA tooling supplies sampled process GPU memory. Linux RAPL supplies CPU-package energy when readable. Unavailable measurements remain null. Sampled maxima can miss brief peaks, and process RSS can double-count shared pages.
 
-| Base model / quantization | Prompt | Language | Cold/warm latency | Generation tokens/s | Model size / VRAM | Human correctness | Human fidelity |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Fill after a real run | | | | | | | |
+The benchmark also records Ollama's loaded model `size` and `size_vram` where available. Those are separate from sampled process RAM and are not whole-device peak memory.
 
-Do not substitute the evidence-only baseline for real LLM comparisons.
+## 4. Obtain human ratings
+
+The runner exports `human_review.csv` with output text and blank fields:
+
+- `correct`, `critical_error`, `complete`: 0/1, with blank meaning not rated.
+- Agronomic correctness, usefulness and translation fidelity: integer 1–5, or blank.
+- `reviewer`, negation preservation and notes.
+
+Have an agronomist score advice and context applicability. Have fluent regional-language reviewers assess terminology, conditions, quantities, units, negation and uncertainty. Use two or more reviewers for agreement analysis. Copy the sheet for additional reviewers, then combine their rows with distinct reviewer identifiers. Never fill scores using synthetic assumptions or software-test counts.
+
+## 5. Analyze real results
+
+```bash
+python scripts/analyze_experiments.py reports/quantization/results.json --reviews reports/quantization/human_review.csv --compare-models crop-fp16 crop-q4 --output reports/analysis
+```
+
+Outputs include median/p95 latency, throughput, retrieved-topic counts, human summaries, paired bootstrap differences and separate unweighted Cohen kappa for correctness and translation-fidelity ratings. Repeated outputs are clustered by case. For binary case correctness/completeness, a case passes only if all its reviewed repeats pass; a case has a critical error if any reviewed repeat contains one. Wilson intervals use these case-level counts. Paired bootstrap comparisons use matched cases under the same language/style/strategy and reviewer.
+
+Quality/resource plots require actual human scores and matplotlib. Without ratings, analysis produces no human accuracy or quality curve. Report language-specific findings, failure cases and source limitations. A retrieval hit is not an agronomic-correctness judgement.
+
+## 6. Check offline behaviour
+
+```bash
+python scripts/offline_check.py --mode evidence
+python scripts/offline_check.py --mode llm --model crop-q4 --require-network-disconnected
+```
+
+The client guard prevents non-loopback TCP connections and external DNS in the Python process. It **does not isolate Ollama**. The strict option also requires no active non-loopback interfaces as reported by psutil and fails if adapters cannot be inspected. For the paper's real offline demonstration, disconnect networking or use OS isolation for both processes after installing all weights and local knowledge. Capture the target-machine state and results. Do not call a successful client guard a complete hardware offline experiment.

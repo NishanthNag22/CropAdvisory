@@ -38,8 +38,8 @@ def load_dataset(path,split='all'):
         if not case.get('id') or case['id'] in ids:raise ValueError('Case identifiers must be present and unique.')
         ids.add(case['id'])
         if not isinstance(case.get('expected_topics'),list):raise ValueError('Each case needs expected_topics.')
-        if case.get('expert_reviewed') and not case.get('expert_review',{}).get('reviewer'):
-            raise ValueError('Expert-reviewed claims require a named reviewer.')
+        if case.get('expert_reviewed') and (not case.get('expert_review',{}).get('reviewer') or not case.get('expert_review',{}).get('source_urls') or not case.get('rubric',{}).get('reference_answer')):
+            raise ValueError('Expert-reviewed claims require reviewer provenance, sources and a reference answer.')
     chosen=[c for c in cases if split=='all' or c.get('split')==split]
     if not chosen:raise ValueError('No cases in the requested split.')
     return chosen,dict(metadata,selected_split=split,dataset_sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest())
@@ -158,6 +158,7 @@ def main():
     p.add_argument('--output',type=Path,default=ROOT/'reports/benchmark')
     args=p.parse_args()
     if args.repeats<1 or args.warmup_runs<0:p.error('Repetitions must be positive; warm-ups must not be negative.')
+    if any(pid<1 for pid in args.monitor_pids):p.error('Monitor PIDs must be positive integers.')
     try:
         cases,dataset=load_dataset(args.cases,args.split)
         args.output.mkdir(parents=True,exist_ok=True);client=Ollama()

@@ -23,3 +23,7 @@ The legacy tomato records retain the original guidance and verification flags; t
 5. Test claim screening and translation with numerical, negation and regional-scope cases.
 
 Public provenance does not remove the need for crop experts to review advice for a particular field.
+
+## Applicability fields
+
+New records expose `regions`, `seasons`, `production_systems`, `published_on`, `reviewed_on` and optional `valid_until`. The bundled publication dates and unspecified seasons remain null/empty because they have not been verified. The application reports that gap rather than manufacturing dates or universal applicability. `max_source_age_days` marks older metadata for currency review; an explicit validity expiry excludes a record.
