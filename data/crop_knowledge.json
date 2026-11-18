@@ -1,0 +1,37 @@
+[
+  {
+    "crop": "rice", "topic": "soil_moisture", "region": "Tamil Nadu, India; transplanted rice",
+    "guidance": "For transplanted rice, TNAU describes irrigation in relation to establishment and later growth stages. Its guidance includes removal of surplus field water. These recommendations concern transplanted fields, not every rice production system.",
+    "source": "TNAU - Rice irrigation management", "source_url": "https://agritech.tnau.ac.in/agriculture/agri_irrigationmgt_cereals_rice1.html", "verified": true, "reviewed_on": "2026-11-18"
+  },
+  {
+    "crop": "rice", "topic": "growth_stage", "region": "Tamil Nadu, India; transplanted rice",
+    "guidance": "TNAU identifies panicle initiation, booting, heading and flowering as rice stages when water availability is especially important. The alternate wetting and drying method described by TNAU observes water through a field water tube; a VWC reading alone is not that measurement.",
+    "source": "TNAU - Rice irrigation management", "source_url": "https://agritech.tnau.ac.in/agriculture/agri_irrigationmgt_cereals_rice1.html", "verified": true, "reviewed_on": "2026-11-18"
+  },
+  {
+    "crop": "wheat", "topic": "soil_moisture", "region": "Tamil Nadu, India",
+    "guidance": "TNAU links wheat irrigation requirements to soil type and rainfall. It advises preventing standing water during germination. A single soil moisture percentage does not establish a field irrigation schedule.",
+    "source": "TNAU - Wheat irrigation management", "source_url": "https://agritech.tnau.ac.in/agriculture/agri_irrigationmgt_wheat.html", "verified": true, "reviewed_on": "2026-11-18"
+  },
+  {
+    "crop": "wheat", "topic": "growth_stage", "region": "Tamil Nadu, India",
+    "guidance": "For wheat, TNAU highlights crown root initiation and flowering as particularly important irrigation stages. Confirm the crop stage before interpreting its regional irrigation guidance.",
+    "source": "TNAU - Wheat irrigation management", "source_url": "https://agritech.tnau.ac.in/agriculture/agri_irrigationmgt_wheat.html", "verified": true, "reviewed_on": "2026-11-18"
+  },
+  {
+    "crop": "wheat", "topic": "soil_nutrition", "region": "Tamil Nadu, India",
+    "guidance": "TNAU recommends basing wheat NPK fertilizer decisions on soil testing wherever possible. This advisory knowledge base deliberately omits blanket fertilizer application rates.",
+    "source": "TNAU - Wheat field preparation", "source_url": "https://agritech.tnau.ac.in/agriculture/agri_cropproduction_wheat_fieldpreparation.html", "verified": true, "reviewed_on": "2026-11-18"
+  },
+  {
+    "crop": "cotton", "topic": "soil_moisture", "region": "Tamil Nadu, India; irrigated cotton",
+    "guidance": "TNAU says cotton irrigation should account for the soil, current weather and rainfall received. Its schedules distinguish crop phases and hybrids from varieties, so a universal moisture target is not supplied here.",
+    "source": "TNAU - Irrigated cotton water management", "source_url": "https://agritech.tnau.ac.in/agriculture/agri_cotton_irri_irrigation%20management.html", "verified": true, "reviewed_on": "2026-11-18"
+  },
+  {
+    "crop": "cotton", "topic": "growth_stage", "region": "Tamil Nadu, India; irrigated cotton",
+    "guidance": "TNAU highlights square formation and boll maturity as critical irrigation stages for cotton. Identify the current crop phase when reviewing the local guidance.",
+    "source": "TNAU - Irrigated cotton water management", "source_url": "https://agritech.tnau.ac.in/agriculture/agri_cotton_irri_irrigation%20management.html", "verified": true, "reviewed_on": "2026-11-18"
+  }
+]

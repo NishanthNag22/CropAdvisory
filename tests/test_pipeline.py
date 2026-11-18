@@ -36,3 +36,24 @@ def test_translation_keeps_script_and_labels():
 def test_no_external_model_host():
     with pytest.raises(ValueError):
         Ollama('https://example.com')
+
+@pytest.mark.parametrize('crop',['tomato','rice','wheat','cotton'])
+def test_crop_filter(crop):
+    result=advise({'crop':crop,'question':'irrigation water','moisture':32},mode='evidence')
+    assert result['evidence']
+    assert all(e['crop']==crop for e in result['evidence'])
+    if crop != 'tomato':
+        assert '6.5' not in result['answer']
+
+def test_unknown_crop_rejected():
+    with pytest.raises(ValueError):
+        validate_input({'crop':'banana','question':'irrigation'})
+
+def test_unsupported_topic_has_no_made_up_guidance():
+    result=advise({'crop':'rice','question':'What pH is ideal?'},mode='evidence')
+    assert result['evidence']==[]
+
+@pytest.mark.parametrize('crop',['rice','wheat','cotton'])
+def test_growth_stage_guidance(crop):
+    result=advise({'crop':crop,'question':'water at flowering stage'},mode='evidence')
+    assert 'growth_stage' in [e['topic'] for e in result['evidence']]

@@ -42,7 +42,12 @@ def build_index(entries, model):
         normalize_embeddings=True
     )
 
-    index = NumpyIndex(embeddings.astype(np.float32))
+    try:
+        import faiss
+        index = faiss.IndexFlatIP(embeddings.shape[1])
+        index.add(embeddings.astype(np.float32))
+    except ImportError:
+        index = NumpyIndex(embeddings.astype(np.float32))
 
     return index, documents
 

@@ -8,6 +8,9 @@ from crop_advisory.engine import advise, AdvisoryError
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--crop", choices=["tomato", "rice", "wheat", "cotton"], default="tomato")
+    for name in ("region", "soil-type", "growth-stage", "symptoms"):
+        parser.add_argument("--" + name, default="")
     parser.add_argument("--question")
     parser.add_argument("--moisture", type=float)
     parser.add_argument("--temperature", type=float)
