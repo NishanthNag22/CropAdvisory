@@ -17,8 +17,8 @@ from .translation import unit_checks, semantic_review, translate_advisory, norma
 from .errors import AdvisoryError, ModelOutputTruncated
 
 ROOT = Path(__file__).resolve().parents[1]
-LANGUAGES = {"en": "English", "kn": "Kannada", "hi": "Hindi"}
-SCRIPTS = {"kn": (0x0C80, 0x0CFF), "hi": (0x0900, 0x097F)}
+LANGUAGES = {"en": "English", "hi": "Hindi"}
+SCRIPTS = {"hi": (0x0900, 0x097F)}
 
 def validate_input(data, now=None):
     if not isinstance(data, dict):

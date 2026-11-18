@@ -25,9 +25,9 @@ class Handler(BaseHTTPRequestHandler):
                 self.respond(200, json.dumps(Ollama(timeout=3).request("/api/tags")))
             except (ValueError, AdvisoryError) as exc:
                 self.respond(503, json.dumps({"error": str(exc)}))
-        elif path in ("/", "/app.js", "/style.css"):
-            name = {"/": "index.html", "/app.js": "app.js", "/style.css": "style.css"}[path]
-            mime = {"/": "text/html", "/app.js": "text/javascript", "/style.css": "text/css"}[path]
+        elif path in ("/", "/app.js", "/i18n.js", "/hi.json", "/style.css"):
+            name = {"/": "index.html", "/app.js": "app.js", "/i18n.js": "i18n.js", "/hi.json": "hi.json", "/style.css": "style.css"}[path]
+            mime = {"/": "text/html", "/app.js": "text/javascript", "/i18n.js": "text/javascript", "/hi.json": "application/json", "/style.css": "text/css"}[path]
             self.respond(200, (ROOT / "web" / name).read_text(encoding="utf-8"), mime + "; charset=utf-8")
         else:
             self.respond(404, '{"error":"Not found"}')

@@ -99,14 +99,19 @@ def protect_terms(text):
     return TERM_RE.sub(replace,text),terms
 
 
-def restore_terms(text,terms):
+HINDI_CROPS = {"tomato":"टमाटर", "tomatoes":"टमाटर", "rice":"धान", "wheat":"गेहूँ", "cotton":"कपास"}
+
+
+def restore_terms(text,terms,language=None):
     for token in terms:
         if len(re.findall(re.escape(token),text,flags=re.I))!=1:
             raise ValueError('A protected measurement or technical term was omitted or duplicated.')
     unexpected=set(re.findall(r'ZXQ[A-Z]+QXZ',text,re.I))-{token for token in terms}
     if {t.upper() for t in unexpected}-{t.upper() for t in terms}:
         raise ValueError('The translation introduced an unknown protected term.')
-    for token,value in terms.items():text=re.sub(re.escape(token),lambda _:value,text,flags=re.I)
+    for token,value in terms.items():
+        restored=HINDI_CROPS.get(value.lower(),value) if language=="Hindi" else value
+        text=re.sub(re.escape(token),lambda _:restored,text,flags=re.I)
     return text
 
 
@@ -142,7 +147,7 @@ def translate_advisory(original,language,client,model):
                     raise ValueError('The model introduced an unexpected source citation.')
                 candidate=CITATION_RE.sub('',candidate).strip()
                 candidate=re.sub(r'(?m)^\s*\d+[.)]\s+', '',candidate)
-                candidate=restore_terms(candidate,terms)
+                candidate=restore_terms(candidate,terms,language)
                 if not candidate:raise ValueError('The translation contained no advisory text.')
                 audit['restored_text_audit_only']=candidate
                 completed.append(candidate+(' '+' '.join(f'[Evidence {ref}]' for ref in refs) if refs else ''))

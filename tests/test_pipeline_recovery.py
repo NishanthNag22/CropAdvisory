@@ -10,7 +10,6 @@ from crop_advisory.translation import DIMENSIONS, translate_advisory, translatio
 
 EVIDENCE=[{'crop':'tomato','topic':'soil_moisture','guidance':'Check soil moisture and drainage before changing irrigation.','source':'Test fixture'}]
 LANGUAGES={
- 'kn':('Kannada','ನೀರಾವರಿಯನ್ನು ಬದಲಾಯಿಸುವ ಮೊದಲು ಮಣ್ಣಿನ ತೇವಾಂಶ ಮತ್ತು ನೀರು ಹರಿದುಹೋಗುವಿಕೆಯನ್ನು ಪರಿಶೀಲಿಸಿ. [Evidence 1]'),
  'hi':('Hindi','सिंचाई बदलने से पहले मिट्टी की नमी और जल निकासी की जाँच करें। [Evidence 1]')}
 
 

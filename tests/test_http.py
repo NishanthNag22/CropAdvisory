@@ -21,7 +21,7 @@ def post(url,payload,headers=None):
 
 
 def test_page_and_assets(server_url):
-    for path in ['/', '/app.js', '/style.css','/api/health']:
+    for path in ['/', '/app.js', '/i18n.js', '/hi.json', '/style.css','/api/health']:
         with urlopen(server_url+path) as response:
             assert response.status==200
             assert response.headers['X-Content-Type-Options']=='nosniff'
