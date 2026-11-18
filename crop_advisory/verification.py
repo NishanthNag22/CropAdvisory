@@ -8,7 +8,7 @@ import re
 
 
 def split_claims(answer):
-    pieces = re.split(r'\n+|(?<=[.!?])\s+', answer)
+    pieces = re.split(r'\n+|(?<=[.!?])\s+|(?<=।)\s*', answer)
     return [p.strip(' -*#\t') for p in pieces if p.strip(' -*#\t')]
 
 

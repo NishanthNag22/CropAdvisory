@@ -144,9 +144,18 @@ def build_messages(data, evidence):
         "Never use excluded sensor readings or stale weather as current observations. Unknown calibration/timestamps require caution. Apply evidence only to its stated crop and regional production system. If the user region differs or is unknown, explain local applicability must be confirmed. Readings alone cannot determine irrigation timing or disease. Temperature guidance is absent from this knowledge base; "
         "state that limitation. Do not infer a moisture target. Explain uncertainty and request missing context. "
         "Answer in English. Cite [Evidence N] for supported claims. Give a brief justification, not hidden chain-of-thought.")
-    style = "Use headings Observations, Suggested checks, Evidence and limitations." if data["prompt_style"] == "structured" else "Answer in at most 150 words."
-    user = {"sensor_summary": sensor_summary(data), "sensor_quality": {k: {key: v[key] for key in ("states", "usable", "timestamp", "calibrated")} for k,v in data.get("sensor_quality", {}).items()}, "weather": decision_weather(data), "farmer_question": data["question"], "evidence": [dict(label=f"Evidence {i}", **e) for i, e in enumerate(evidence, 1)]}
-    return [{"role": "system", "content": system + " " + style}, {"role": "user", "content": json.dumps(user, ensure_ascii=False)}]
+    style = "Use headings Observations, Suggested checks, Evidence and limitations." if data["prompt_style"] != "concise" else "Answer in at most 150 words."
+    evidence_records=[dict(label=f"Evidence {i}", **e) for i,e in enumerate(evidence,1)]
+    user = {"sensor_summary": sensor_summary(data), "sensor_quality": {k: {key: v[key] for key in ("states", "usable", "timestamp", "calibrated")} for k,v in data.get("sensor_quality", {}).items()}, "weather": decision_weather(data), "farmer_question": data["question"], "evidence": evidence_records}
+    if data["prompt_style"] == "unstructured":
+        # Same normalized observations and evidence; change the input representation only.
+        situation = ". ".join(line.replace(": ", " is ", 1) for line in sensor_summary(data).splitlines())
+        content = "A farmer describes this field situation. " + situation + "\nThe farmer asks: " + data['question'] + "\nAgricultural evidence: " + json.dumps(evidence_records, ensure_ascii=False)
+        style = "Use headings Observations, Suggested checks, Evidence and limitations."
+    else:
+        content = json.dumps(user, ensure_ascii=False)
+    return [{"role": "system", "content": system + " " + style}, {"role": "user", "content": content}]
+
 
 
 def translation_checks(original, translated, language):

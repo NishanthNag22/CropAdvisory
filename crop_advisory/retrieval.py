@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CROPS = ('tomato', 'rice', 'wheat', 'cotton')
 # Input vocabulary is expanded before searching English evidence.
 ALIASES = {
-    'soil_moisture': ('water','moisture','irrigation','drainage','dry','wet','flood','watering'),
+    'soil_moisture': ('water','moisture','irrigation','irrigate','drainage','dry','wet','flood','watering'),
     'soil_pH': ('ph','acid','acidic','alkaline','alkalinity'),
     'nitrogen_deficiency': ('nitrogen','yellow','leaves','deficiency','nutrient'),
     'soil_nutrition': ('fertilizer','fertiliser','nutrient','npk','soil test'),

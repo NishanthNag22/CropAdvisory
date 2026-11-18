@@ -17,3 +17,5 @@ jobs:
       - run: python -m pytest -q
       - run: python scripts/benchmark.py
       - run: python scripts/batch_advice.py data/sensor_samples.csv --mode evidence
+      - run: python scripts/analyze_experiments.py reports/benchmark/results.json
+      - run: python scripts/offline_check.py --mode evidence
