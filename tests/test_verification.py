@@ -50,6 +50,6 @@ def test_no_evidence_does_not_generate_unsupported_advice():
     client.chat.assert_not_called()
 
 def test_translation_is_of_screened_advice():
-    client=Mock();client.chat.side_effect=[('Apply 50 kg/ha urea.',{}),('मिट्टी की जाँच करें [Evidence 1]',{})]
+    client=Mock();client.chat.side_effect=[('Apply 50 kg/ha urea.',{}),('मिट्टी की जाँच करें [Evidence 1]',{}),(json.dumps({'checks':{k:True for k in ('units','crop_names','conditions','negation','warnings','uncertainty','overall_meaning')},'reason':'test fixture'}),{})]
     result=advise({'question':'irrigation','language':'hi'},client=client)
-    assert result['translation'] and '50 kg' not in client.chat.call_args.args[1][1]['content']
+    assert result['translation'] and '50 kg' not in client.chat.call_args_list[1].args[1][1]['content']
