@@ -133,4 +133,4 @@ After pulling updates, stop the old web server with Ctrl+C and restart `python a
 python scripts/check_languages.py --model llama3.2:3b
 ```
 
-The app retries truncated translations with sentence chunks and preserves completed claim assessments when a neighbouring review fails. English remains available if regional output cannot be validated, with the exact failure reason shown. Test fixtures are not evidence of actual multilingual quality; inspect the saved local results and obtain fluent-speaker review.
+The app translates complete text chunks with application-managed citations and protected measurement markers. It retries truncated or invalid-marker output and preserves completed claim assessments when a neighbouring review fails. English remains available if regional output cannot be validated, with the exact failure reason shown. Test fixtures are not evidence of actual multilingual quality; inspect the saved local results and obtain fluent-speaker review.

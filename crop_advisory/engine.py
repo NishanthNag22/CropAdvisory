@@ -4,6 +4,7 @@ import math
 import os
 import re
 import time
+from collections import Counter
 from pathlib import Path
 from urllib.error import URLError
 from urllib.request import Request, urlopen
@@ -12,7 +13,7 @@ from .retrieval import CROPS, retrieve
 from .verification import assess, screened_answer
 from .quality import normalize_measurements, normalize_weather, number
 from .applicability import screen_sources
-from .translation import unit_checks, semantic_review, translate_advisory
+from .translation import unit_checks, semantic_review, translate_advisory, normalize_equivalents
 from .errors import AdvisoryError, ModelOutputTruncated
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -163,16 +164,16 @@ def build_messages(data, evidence):
 def translation_checks(original, translated, language):
     # Evidence labels contain structural numbers, not agricultural measurements.
     def numbers(text):
-        text = re.sub(r"\[Evidence\s+\d+\]", "", text)
-        return set(re.findall(r"(?<!\w)-?\d+(?:\.\d+)?", text))
-    missing = sorted(numbers(original) - numbers(translated))
-    added = sorted(numbers(translated) - numbers(original))
+        text = re.sub(r"\[Evidence\s+\d+\]", "", normalize_equivalents(text))
+        return Counter(re.findall(r"(?<!\w)-?\d+(?:\.\d+)?", text))
+    missing = sorted((numbers(original) - numbers(translated)).elements())
+    added = sorted((numbers(translated) - numbers(original)).elements())
     low, high = SCRIPTS[language]
     script_present = any(low <= ord(c) <= high for c in translated)
-    labels = set(re.findall(r"\[Evidence\s+\d+\]", original))
-    translated_labels = set(re.findall(r"\[Evidence\s+\d+\]", translated))
-    missing_labels = sorted(labels - translated_labels)
-    added_labels = sorted(translated_labels - labels)
+    labels = Counter(re.findall(r"\[Evidence\s+\d+\]", normalize_equivalents(original)))
+    translated_labels = Counter(re.findall(r"\[Evidence\s+\d+\]", normalize_equivalents(translated)))
+    missing_labels = sorted((labels - translated_labels).elements())
+    added_labels = sorted((translated_labels - labels).elements())
     return {**unit_checks(original, translated), "numbers_preserved": not missing and not added, "missing_numbers": missing, "added_numbers": added, "target_script_present": script_present,
             "evidence_labels_preserved": not missing_labels and not added_labels, "missing_labels": missing_labels, "added_labels": added_labels,
             "human_review_required": True}
@@ -229,6 +230,8 @@ def advise(payload, client=None, model=None, mode="llm", translation_model=None)
             translated = None
             translation_status = "unavailable"
             translation_failure_reason = str(exc)
+            if getattr(exc, "metrics", None):
+                translation_metrics = exc.metrics
             translation_review = {"accepted":False,"error":str(exc),"human_review_required":True}
     return {"input": data, "summary": sensor_summary(data), "answer": answer, "translation": translated,
         "language": LANGUAGES[data["language"]], "translation_checks": checks, "evidence": evidence,

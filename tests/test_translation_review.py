@@ -24,15 +24,23 @@ def test_malformed_reviews_fail_closed(bad):
     assert not semantic_review('test','परीक्षण','Hindi','rice',client,'test')['accepted']
 
 def test_pipeline_returns_english_when_translation_loses_number():
-    client=Mock();client.chat.side_effect=[('Apply 50 kg/ha urea.',{}),('मिट्टी 999 [Evidence 1]',{})]
+    client=Mock()
+    def fake(model,messages,**kwargs):
+        return ('Apply 50 kg/ha urea.',{}) if client.chat.call_count==1 else ('मिट्टी 999',{})
+    client.chat.side_effect=fake
     result=advise({'question':'irrigation','language':'hi'},client=client)
     assert result['translation'] is None and result['answer']
     assert result['translation_status']=='withheld'
 
 def test_pipeline_failed_semantic_review_preserves_english():
-    client=Mock();client.chat.side_effect=[('Apply 50 kg/ha urea.',{}),('मिट्टी [Evidence 1]',{}),(review_response(negation=False),{})]
+    client=Mock()
+    def fake(model,messages,**kwargs):
+        if client.chat.call_count==1:return 'Apply 50 kg/ha urea.',{}
+        if kwargs.get('json_output'):return review_response(negation=False),{}
+        return 'मिट्टी की जाँच करें',{}
+    client.chat.side_effect=fake
     result=advise({'question':'irrigation','language':'hi'},client=client)
-    assert result['translation'] is None and result['translation_review']['checks']['negation'] is False
+    assert result['translation'] is None and result['translation_review']['checks']['negation'] is False and result['translation_review']['method']=='local_model_assessment'
 
 def test_translation_service_failure_preserves_english():
     client=Mock();client.chat.side_effect=[('Apply 50 kg/ha urea.',{}),AdvisoryError('unavailable')]

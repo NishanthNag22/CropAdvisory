@@ -2,7 +2,7 @@
 
 ## Verified software checks
 
-The expanded implementation passes **130 automated tests** after the multilingual recovery fixes. Tests cover measurement conversion and quality, source applicability, translation withholding, prompt representation, resource reporting, statistics, dataset provenance, offline client guards, and HTTP integration.
+The expanded implementation passes **146 automated tests** after the multilingual recovery and metadata fixes. Tests cover measurement conversion and quality, source applicability, translation withholding, prompt representation, resource reporting, statistics, dataset provenance, offline client guards, and HTTP integration.
 
 An evidence-only smoke run completed all **13 cases in the evaluation split**, for both structured and unstructured configuration labels. It retrieved the expected topics or abstained as specified. Evidence-only mode makes no LLM call: these runs test plumbing and source selection, **not prompt quality or agronomic accuracy**.
 
@@ -129,3 +129,11 @@ python scripts/check_languages.py --model llama3.2:3b
 ```
 
 The command checks Hindi, Kannada, Tamil and Telugu sequentially, prints each result and saves `reports/language-check.json` after each language. A failed automated check yields exit code 1 and retains the reason. Have fluent speakers review accepted translations; increasing token limits cannot guarantee that a model knows a language.
+
+### Citation and technical-value preservation
+
+Citation-only fragments are attached to the preceding substantive claim and are never independently reviewed or rendered as advisory text. Translation receives complete text chunks with citation metadata removed; the application reattaches the source IDs belonging to each chunk. The model cannot select replacement evidence IDs.
+
+Numbers and canonical technical terms (including pH, VWC and measurement units) are replaced with opaque letter-only markers before translation. Every marker must survive exactly once before its original value can be restored. Missing/duplicated markers and unexpected citations trigger bounded retries and otherwise withhold the translation. No missing measurement is silently invented or appended.
+
+Unicode decimal digits and compatibility symbols are normalized for equivalent-value comparisons (for example, Kannada decimal glyphs or the Celsius compatibility character). Numerical and citation multiplicity is checked, so duplicated or changed values remain failures. Semantic review compares the natural-language text; citation metadata is checked independently by the application. Raw candidate text is retained only in the JSON audit metrics and is not shown as advice. These candidates can be incomplete or invalid.

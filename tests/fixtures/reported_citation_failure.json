@@ -1,0 +1,60 @@
+{
+  "draft": "Based on the provided evidence, two short checks before changing tomato irrigation in Tamil Nadu, India are:\n\n1. Check actual soil moisture levels, as TNAU notes that maintaining an even water supply is important for tomatoes. [Evidence 1]\n2. Check the local soil pH level, as TNAU lists a recommended pH range of 6.5 to 7.5 for tomato cultivation. [Evidence 2]\n\nInterpret the moisture, temperature, and pH readings cautiously due to unknown timestamps and calibration information.",
+  "assessments": [
+    {
+      "id": 0,
+      "claim": "Check actual soil moisture levels, as TNAU notes that maintaining an even water supply is important for tomatoes.",
+      "status": "insufficient_evidence",
+      "reason": "Missing context on water supply for tomatoes",
+      "evidence": [
+        1
+      ],
+      "method": "local_model",
+      "review_attempts": 1
+    },
+    {
+      "id": 1,
+      "claim": "[Evidence 1]",
+      "status": "supported",
+      "reason": "Careful irrigation and even water supply are important for tomatoes.",
+      "evidence": [
+        1
+      ],
+      "method": "local_model",
+      "review_attempts": 2
+    },
+    {
+      "id": 2,
+      "claim": "Check the local soil pH level, as TNAU lists a recommended pH range of 6.5 to 7.5 for tomato cultivation.",
+      "status": "supported",
+      "reason": "Local soil pH range for tomato cultivation is 6.5 to 7.5.",
+      "evidence": [
+        2
+      ],
+      "method": "local_model",
+      "review_attempts": 2
+    },
+    {
+      "id": 3,
+      "claim": "[Evidence 2]",
+      "status": "supported",
+      "reason": "TNAU notes importance of even water supply for tomatoes.",
+      "evidence": [
+        1
+      ],
+      "method": "local_model",
+      "review_attempts": 1
+    },
+    {
+      "id": 4,
+      "claim": "Interpret the moisture, temperature, and pH readings cautiously due to unknown timestamps and calibration information.",
+      "status": "insufficient_evidence",
+      "reason": "Unknown timestamps and calibration information.",
+      "evidence": [
+        1
+      ],
+      "method": "local_model",
+      "review_attempts": 1
+    }
+  ]
+}

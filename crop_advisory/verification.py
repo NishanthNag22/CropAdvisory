@@ -27,6 +27,10 @@ def split_claims(answer):
         for piece in re.split(r'(?<=[.!?])\s+|(?<=।)\s*', line):
             piece = piece.strip(' *#\t')
             if piece and not re.fullmatch(r'\d+[.)]', piece):
+                if not without_citations(piece):
+                    if claims:
+                        claims[-1] += ' ' + piece
+                    continue
                 claims.append(piece)
     return claims
 
@@ -127,7 +131,7 @@ def assess(answer, evidence, client, model):
 
 
 def screened_answer(assessments, evidence):
-    accepted = [r for r in assessments if r['status']=='supported']
+    accepted = [r for r in assessments if r['status']=='supported' and without_citations(r['claim'])]
     if accepted:
         return '\n\n'.join(without_citations(r['claim']) + ' ' + ' '.join(f'[Evidence {i}]' for i in r['evidence']) for r in accepted)
     if evidence:
