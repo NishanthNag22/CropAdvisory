@@ -9,6 +9,7 @@ from urllib.error import URLError
 from urllib.request import Request, urlopen
 from urllib.parse import urlparse
 from .retrieval import CROPS, retrieve
+from .verification import assess, screened_answer
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGUAGES = {"en": "English", "kn": "Kannada", "hi": "Hindi", "ta": "Tamil", "te": "Telugu"}
@@ -96,9 +97,12 @@ class Ollama:
             raise AdvisoryError("Ollama returned an error: " + str(result))
         return result
 
-    def chat(self, model, messages):
-        result = self.request("/api/chat", {"model": model, "messages": messages, "stream": False,
-            "options": {"temperature": 0, "seed": 42, "num_ctx": 4096, "num_predict": 800}})
+    def chat(self, model, messages, json_output=False):
+        payload = {"model": model, "messages": messages, "stream": False,
+            "options": {"temperature": 0, "seed": 42, "num_ctx": 4096, "num_predict": 800}}
+        if json_output:
+            payload["format"] = "json"
+        result = self.request("/api/chat", payload)
         answer = result.get("message", {}).get("content")
         if not isinstance(answer, str) or not answer.strip():
             raise AdvisoryError("The local model returned an empty answer.")
@@ -143,12 +147,18 @@ def advise(payload, client=None, model=None, mode="llm", translation_model=None)
     started = time.perf_counter()
     model = model or os.getenv("OLLAMA_MODEL", "llama3.2:3b")
     metrics = {}
+    verification = []
+    verification_error = None
+    draft = None
     if mode == "evidence":
         answer = "Evidence-only preview (no LLM inference)\n\n" + "\n\n".join(f"[Evidence {i}] {e['guidance']}" for i, e in enumerate(evidence, 1))
         answer += "\n\nNo diagnosis or sensor-specific irrigation target is available. Temperature thresholds are not covered."
     else:
         client = client or Ollama()
-        answer, metrics = client.chat(model, build_messages(data, evidence))
+        if evidence:
+            draft, metrics = client.chat(model, build_messages(data, evidence))
+            verification, verification_error = assess(draft, evidence, client, model)
+        answer = screened_answer(verification, evidence)
     translated = None
     checks = None
     translation_metrics = None
@@ -163,4 +173,8 @@ def advise(payload, client=None, model=None, mode="llm", translation_model=None)
     return {"input": data, "summary": sensor_summary(data), "answer": answer, "translation": translated,
         "language": LANGUAGES[data["language"]], "translation_checks": checks, "evidence": evidence,
         "mode": mode, "model": model if mode == "llm" else None, "metrics": metrics,
+        "verification": verification, "verification_error": verification_error,
+        "verification_note": "Automated support assessments can be wrong; agronomist review is still required.",
+        "withheld_claims": sum(r["status"] != "supported" for r in verification),
+        "draft": draft,
         "translation_metrics": translation_metrics, "elapsed_seconds": round(time.perf_counter() - started, 3)}
