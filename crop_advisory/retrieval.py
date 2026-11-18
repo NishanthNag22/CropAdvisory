@@ -20,7 +20,7 @@ def load_entries(crop):
         raise ValueError('Unsupported crop: ' + str(crop))
     if crop == 'tomato':
         entries = json.loads((ROOT/'data/tomato_knowledge.json').read_text(encoding='utf-8'))
-        return [dict(e, crop='tomato', region='Tamil Nadu, India', reviewed_on='2026-11-18') for e in entries]
+        return [dict(e, crop='tomato', region='Tamil Nadu, India', reviewed_on=e.get('reviewed_on'), provenance='legacy prototype') for e in entries]
     entries = json.loads((ROOT/'data/crop_knowledge.json').read_text(encoding='utf-8'))
     return [e for e in entries if e['crop'] == crop]
 

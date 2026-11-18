@@ -27,3 +27,11 @@ def test_offline_cases_are_crop_isolated():
     rows=run(cases,['evidence-only'],['en'],['structured'],2)
     assert all(r['status']=='ok' and r['crop_isolation'] and r['all_expected_retrieved'] for r in rows)
     assert summarize(rows)[0]['repeat_exact_consistency']==1
+
+def test_benchmark_abstention_is_not_model_generation():
+    case={'id':'outside','crop':'rice','question':'What pH is ideal?','expected_topics':[]}
+    client=Mock()
+    rows=run([case],['not-installed'],['en'],['concise'],1,client)
+    summary=summarize(rows)[0]
+    assert summary['abstentions']==1 and summary['generated_advisories']==0
+    client.chat.assert_not_called()

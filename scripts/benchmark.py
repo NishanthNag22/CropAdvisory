@@ -32,10 +32,10 @@ def run(cases,models,languages,styles,repeats,client=None):
         started=time.perf_counter()
         try:
             result=advise(payload,client=client,model=model,mode='evidence' if model=='evidence-only' else 'llm')
-            row.update(status='ok',result=result,**retrieval_score(case,result['evidence']))
+            row.update(status='abstained' if model!='evidence-only' and not result['generation_performed'] else 'ok',result=result,**retrieval_score(case,result['evidence']))
             metrics=result['metrics'];duration=metrics.get('eval_duration') or 0
             row['generation_tokens_per_second']=(metrics.get('eval_count') or 0)/(duration/1e9) if duration else None
-            if model!='evidence-only':
+            if model!='evidence-only' and result['generation_performed']:
                 try:
                     loaded=client.request('/api/ps').get('models',[])
                     match=next((m for m in loaded if m.get('name')==model or m.get('model')==model or m.get('name')==model+':latest'),None)
@@ -55,14 +55,14 @@ def summarize(rows):
         groups[(row['model'],row['language'],row['prompt_style'])].append(row)
     summary=[]
     for key,group in groups.items():
-        good=[r for r in group if r['status']=='ok']
+        good=[r for r in group if r['status'] in ('ok','abstained')]
         rates=[r['generation_tokens_per_second'] for r in good if r['generation_tokens_per_second'] is not None]
         outputs=defaultdict(list)
         for r in good:
             outputs[r['case']].append(r['result']['translation'] or r['result']['answer'])
         repeated=[len(set(texts))==1 for texts in outputs.values() if len(texts)>1]
         summary.append(dict(model=key[0],language=key[1],prompt_style=key[2],attempts=len(group),successes=len(good),
-            failures=len(group)-len(good),mean_wall_seconds=statistics.mean(r['wall_seconds'] for r in good) if good else None,
+            failures=len(group)-len(good),abstentions=sum(r['status']=='abstained' for r in group),generated_advisories=sum(r['result']['generation_performed'] for r in good),mean_wall_seconds=statistics.mean(r['wall_seconds'] for r in good) if good else None,
             mean_generation_tokens_per_second=statistics.mean(rates) if rates else None,
             retrieval_all_expected_rate=sum(r['all_expected_retrieved'] for r in good)/len(good) if good else None,
             repeat_exact_consistency=sum(repeated)/len(repeated) if repeated else None))

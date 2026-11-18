@@ -95,7 +95,7 @@ def assess(answer, evidence, client, model):
 def screened_answer(assessments, evidence):
     accepted = [r for r in assessments if r['status']=='supported']
     if accepted:
-        return '\n\n'.join(r['claim'] + (' ' + ' '.join(f'[Evidence {i}]' for i in r['evidence']) if not re.search(r'\[Evidence\s+\d+\]',r['claim']) else '') for r in accepted)
+        return '\n\n'.join(re.sub(r'\[Evidence\s+\d+\]', '', r['claim']).strip() + ' ' + ' '.join(f'[Evidence {i}]' for i in r['evidence']) for r in accepted)
     if evidence:
         return 'The generated claims could not be supported. Refer to the retrieved guidance:\n\n' + '\n\n'.join(f"[Evidence {i}] {e['guidance']}" for i,e in enumerate(evidence,1))
     return 'The available knowledge base does not cover this question for the selected crop. More local agricultural evidence is needed.'

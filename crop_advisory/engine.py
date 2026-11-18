@@ -74,8 +74,11 @@ def knowledge():
 
 
 def select_evidence(data):
-    return retrieve(data, backend=os.getenv("RETRIEVAL_BACKEND", "lexical"),
-                    model_path=os.getenv("EMBEDDING_MODEL_PATH"))
+    try:
+        return retrieve(data, backend=os.getenv("RETRIEVAL_BACKEND", "lexical"),
+                        model_path=os.getenv("EMBEDDING_MODEL_PATH"))
+    except (ImportError, OSError) as exc:
+        raise AdvisoryError("Local embedding resources are unavailable. Install requirements-semantic.txt and predownload the model, or select lexical retrieval.") from exc
 
 
 class Ollama:
@@ -85,6 +88,7 @@ class Ollama:
         if parsed.scheme != "http" or parsed.hostname not in ("localhost", "127.0.0.1", "::1") or parsed.username or parsed.password:
             raise ValueError("OLLAMA_HOST must be a local HTTP address for offline operation.")
         self.timeout = timeout
+        self._checked_models = set()
 
     def request(self, path, payload=None):
         req = Request(self.base_url + path, data=None if payload is None else json.dumps(payload).encode(), headers={"Content-Type": "application/json"})
@@ -98,12 +102,22 @@ class Ollama:
         return result
 
     def chat(self, model, messages, json_output=False):
+        if not isinstance(model, str) or not model.strip() or len(model) > 200:
+            raise ValueError("Invalid model name.")
+        if "cloud" in model.lower():
+            raise AdvisoryError("Cloud model tags are disabled. Install local model weights for offline inference.")
+        if model not in self._checked_models:
+            info = self.request("/api/show", {"model": model})
+            if info.get("remote_host") or info.get("remote_model"):
+                raise AdvisoryError("This model routes inference remotely. Select a model with local weights.")
+            self._checked_models.add(model)
         payload = {"model": model, "messages": messages, "stream": False,
             "options": {"temperature": 0, "seed": 42, "num_ctx": 4096, "num_predict": 800}}
         if json_output:
             payload["format"] = "json"
         result = self.request("/api/chat", payload)
-        answer = result.get("message", {}).get("content")
+        message = result.get("message")
+        answer = message.get("content") if isinstance(message, dict) else None
         if not isinstance(answer, str) or not answer.strip():
             raise AdvisoryError("The local model returned an empty answer.")
         if result.get("done_reason") == "length":
@@ -128,12 +142,15 @@ def translation_checks(original, translated, language):
         text = re.sub(r"\[Evidence\s+\d+\]", "", text)
         return set(re.findall(r"(?<!\w)-?\d+(?:\.\d+)?", text))
     missing = sorted(numbers(original) - numbers(translated))
+    added = sorted(numbers(translated) - numbers(original))
     low, high = SCRIPTS[language]
     script_present = any(low <= ord(c) <= high for c in translated)
     labels = set(re.findall(r"\[Evidence\s+\d+\]", original))
-    missing_labels = sorted(labels - set(re.findall(r"\[Evidence\s+\d+\]", translated)))
-    return {"numbers_preserved": not missing, "missing_numbers": missing, "target_script_present": script_present,
-            "evidence_labels_preserved": not missing_labels, "missing_labels": missing_labels,
+    translated_labels = set(re.findall(r"\[Evidence\s+\d+\]", translated))
+    missing_labels = sorted(labels - translated_labels)
+    added_labels = sorted(translated_labels - labels)
+    return {"numbers_preserved": not missing and not added, "missing_numbers": missing, "added_numbers": added, "target_script_present": script_present,
+            "evidence_labels_preserved": not missing_labels and not added_labels, "missing_labels": missing_labels, "added_labels": added_labels,
             "human_review_required": True}
 
 
@@ -176,5 +193,5 @@ def advise(payload, client=None, model=None, mode="llm", translation_model=None)
         "verification": verification, "verification_error": verification_error,
         "verification_note": "Automated support assessments can be wrong; agronomist review is still required.",
         "withheld_claims": sum(r["status"] != "supported" for r in verification),
-        "draft": draft,
+        "draft": draft, "generation_performed": draft is not None,
         "translation_metrics": translation_metrics, "elapsed_seconds": round(time.perf_counter() - started, 3)}
