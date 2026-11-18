@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import Mock
 import pytest
 from crop_advisory.verification import split_claims, screened_answer, without_citations
-from crop_advisory.translation import translate_advisory, protect_terms, restore_terms, normalize_equivalents, DIMENSIONS
+from crop_advisory.translation import translate_advisory, protect_terms, restore_terms, normalize_equivalents, translation_chunks, DIMENSIONS
 from crop_advisory.engine import translation_checks, advise
 from crop_advisory.errors import AdvisoryError
 
@@ -95,3 +95,27 @@ def test_meaning_change_still_withholds_translation(monkeypatch):
     result=advise({'question':'water','language':'hi'},client=client)
     assert result['translation'] is None and result['answer']
     assert result['translation_review']['checks']['negation'] is False
+
+
+def test_reported_short_claims_are_translated_separately():
+    original=('Check actual soil moisture levels for tomatoes [Evidence 1]\n\n'
+              'Check local soil pH; the range is 6.5 to 7.5 for tomato cultivation [Evidence 2]')
+    chunks=translation_chunks(original)
+    assert len(chunks)==2
+    assert '[Evidence 1]' in chunks[0] and '[Evidence 2]' not in chunks[0]
+    assert '[Evidence 2]' in chunks[1] and '[Evidence 1]' not in chunks[1]
+    client=Mock()
+    client.chat.side_effect=lambda model,messages,**kwargs:('తనిఖీ చేయండి '+messages[1]['content'],{})
+    output,metrics=translate_advisory(original,'Telugu',client,'fixture')
+    assert client.chat.call_count==2
+    assert 'tomatoes' in output and 'tomato cultivation' in output
+    assert all(translation_checks(original,output,'te')[key] for key in
+               ('numbers_preserved','units_preserved','evidence_labels_preserved'))
+
+
+@pytest.mark.parametrize('crop',['tomato','tomatoes','rice','wheat','cotton','Tomato'])
+def test_canonical_crop_names_cannot_be_changed_by_translator(crop):
+    masked,terms=protect_terms('Check '+crop+' cultivation.')
+    assert crop not in masked
+    assert restore_terms(masked,terms)=='Check '+crop+' cultivation.'
+    with pytest.raises(ValueError):restore_terms('తామర',terms)

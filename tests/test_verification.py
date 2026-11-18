@@ -1,3 +1,4 @@
+import re
 import json
 from unittest.mock import Mock
 from crop_advisory.verification import rule_check, assess, screened_answer
@@ -55,7 +56,7 @@ def test_translation_is_of_screened_advice():
         if client.chat.call_count==1:return 'Apply 50 kg/ha urea.',{}
         if kwargs.get('json_output'):
             return json.dumps({'checks':{k:True for k in ('units','crop_names','conditions','negation','warnings','uncertainty','overall_meaning')},'reason':'test fixture'}),{}
-        return 'मिट्टी की जाँच करें',{}
+        return 'मिट्टी की जाँच करें '+' '.join(re.findall(r'ZXQ[A-Z]+QXZ',messages[1]['content'])),{}
     client.chat.side_effect=fake
     result=advise({'question':'irrigation','language':'hi'},client=client)
     assert result['translation'] and '50 kg' not in client.chat.call_args_list[1].args[1][1]['content']

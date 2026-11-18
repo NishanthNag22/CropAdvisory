@@ -1,3 +1,4 @@
+import re
 import json
 from unittest.mock import Mock
 import pytest
@@ -26,7 +27,7 @@ def test_malformed_reviews_fail_closed(bad):
 def test_pipeline_returns_english_when_translation_loses_number():
     client=Mock()
     def fake(model,messages,**kwargs):
-        return ('Apply 50 kg/ha urea.',{}) if client.chat.call_count==1 else ('मिट्टी 999',{})
+        return ('Apply 50 kg/ha urea.',{}) if client.chat.call_count==1 else ('मिट्टी 999 '+' '.join(re.findall(r'ZXQ[A-Z]+QXZ',messages[1]['content'])),{})
     client.chat.side_effect=fake
     result=advise({'question':'irrigation','language':'hi'},client=client)
     assert result['translation'] is None and result['answer']
@@ -37,7 +38,7 @@ def test_pipeline_failed_semantic_review_preserves_english():
     def fake(model,messages,**kwargs):
         if client.chat.call_count==1:return 'Apply 50 kg/ha urea.',{}
         if kwargs.get('json_output'):return review_response(negation=False),{}
-        return 'मिट्टी की जाँच करें',{}
+        return 'मिट्टी की जाँच करें '+' '.join(re.findall(r'ZXQ[A-Z]+QXZ',messages[1]['content'])),{}
     client.chat.side_effect=fake
     result=advise({'question':'irrigation','language':'hi'},client=client)
     assert result['translation'] is None and result['translation_review']['checks']['negation'] is False and result['translation_review']['method']=='local_model_assessment'
