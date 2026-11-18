@@ -3,8 +3,6 @@ import json
 import sys
 from pathlib import Path
 
-import requests
-from sentence_transformers import SentenceTransformer
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_DIR / "scripts"))
@@ -43,6 +41,7 @@ Farmer's question:
 Give a clear, concise answer.
 """
 
+    import requests
     response = requests.post(
         OLLAMA_URL,
         json={
@@ -121,6 +120,7 @@ def evaluate_answer(case, answer, results):
     }
 
 def main():
+    import requests
     cases = load_cases()
     entries = load_knowledge()
 
@@ -130,6 +130,7 @@ def main():
     if not entries:
         raise ValueError("Knowledge base is empty.")
 
+    from sentence_transformers import SentenceTransformer
     embedding_model = SentenceTransformer(MODEL_NAME)
     index, documents = build_index(entries, embedding_model)
 

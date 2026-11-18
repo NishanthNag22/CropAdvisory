@@ -2,8 +2,6 @@
 import json
 from pathlib import Path
 
-from sentence_transformers import SentenceTransformer
-import faiss
 import numpy as np
 
 
@@ -13,12 +11,26 @@ KNOWLEDGE_FILE = BASE_DIR / "data" / "tomato_knowledge.json"
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
 
+class NumpyIndex:
+    """Exact cosine search for the small knowledge base, without FAISS."""
+    def __init__(self, embeddings):
+        self.embeddings = embeddings
+        self.ntotal = len(embeddings)
+
+    def search(self, query, k):
+        scores = query @ self.embeddings.T
+        indices = np.argsort(-scores, axis=1, kind="stable")[:, :k]
+        return np.take_along_axis(scores, indices, axis=1), indices
+
+
 def load_knowledge():
     with open(KNOWLEDGE_FILE, "r", encoding="utf-8") as file:
         return json.load(file)
 
 
 def build_index(entries, model):
+    if not entries:
+        raise ValueError("Knowledge base is empty.")
     documents = [
         f"Topic: {entry['topic']}. Guidance: {entry['guidance']}"
         for entry in entries
@@ -30,14 +42,15 @@ def build_index(entries, model):
         normalize_embeddings=True
     )
 
-    index = faiss.IndexFlatIP(embeddings.shape[1])
-    index.add(embeddings.astype(np.float32))
+    index = NumpyIndex(embeddings.astype(np.float32))
 
     return index, documents
 
 
 
 def retrieve(query, entries, model, index, documents, top_k=2):
+    if top_k < 1 or not documents:
+        return []
     query_embedding = model.encode(
         [query],
         convert_to_numpy=True,
@@ -72,6 +85,7 @@ def main():
         print("The knowledge base is empty.")
         return
 
+    from sentence_transformers import SentenceTransformer
     model = SentenceTransformer(MODEL_NAME)
     index, documents = build_index(entries, model)
 

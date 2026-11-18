@@ -1,0 +1,1 @@
+"""Offline agricultural advisory pipeline."""

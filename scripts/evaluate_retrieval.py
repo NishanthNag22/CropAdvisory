@@ -3,7 +3,6 @@ import json
 import sys
 from pathlib import Path
 
-from sentence_transformers import SentenceTransformer
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_DIR / "scripts"))
@@ -30,6 +29,7 @@ def main():
     if not cases:
         raise ValueError("Evaluation dataset is empty.")
 
+    from sentence_transformers import SentenceTransformer
     model = SentenceTransformer(MODEL_NAME)
     index, documents = build_index(entries, model)
 
