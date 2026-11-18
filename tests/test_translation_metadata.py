@@ -9,7 +9,7 @@ from crop_advisory.translation import translate_advisory, protect_terms, restore
 from crop_advisory.engine import translation_checks, advise
 from crop_advisory.errors import AdvisoryError
 
-LANGUAGES={'hi':('Hindi','जाँच करें'),'kn':('Kannada','ಪರಿಶೀಲಿಸಿ'),'ta':('Tamil','சரிபார்க்கவும்'),'te':('Telugu','తనిఖీ చేయండి')}
+LANGUAGES={'hi':('Hindi','जाँच करें'),'kn':('Kannada','ಪರಿಶೀಲಿಸಿ')}
 
 
 def test_reported_draft_citations_attach_to_real_claims():
@@ -105,11 +105,11 @@ def test_reported_short_claims_are_translated_separately():
     assert '[Evidence 1]' in chunks[0] and '[Evidence 2]' not in chunks[0]
     assert '[Evidence 2]' in chunks[1] and '[Evidence 1]' not in chunks[1]
     client=Mock()
-    client.chat.side_effect=lambda model,messages,**kwargs:('తనిఖీ చేయండి '+messages[1]['content'],{})
-    output,metrics=translate_advisory(original,'Telugu',client,'fixture')
+    client.chat.side_effect=lambda model,messages,**kwargs:('ಪರಿಶೀಲಿಸಿ '+messages[1]['content'],{})
+    output,metrics=translate_advisory(original,'Kannada',client,'fixture')
     assert client.chat.call_count==2
     assert 'tomatoes' in output and 'tomato cultivation' in output
-    assert all(translation_checks(original,output,'te')[key] for key in
+    assert all(translation_checks(original,output,'kn')[key] for key in
                ('numbers_preserved','units_preserved','evidence_labels_preserved'))
 
 

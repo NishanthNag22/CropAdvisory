@@ -67,7 +67,7 @@ These are example local aliases and file paths, not published downloadable model
 python scripts/benchmark.py --models crop-fp16 crop-q8 crop-q4 --languages en hi --styles structured unstructured --strategies translate direct --repeats 3 --warmup-runs 1 --split evaluation --output reports/quantization
 ```
 
-For Hindi/Kannada/Tamil/Telugu comparisons, name the languages explicitly using `hi kn ta te`. The `direct` arm is a research arm; the normal UI continues to use English-then-translate. Direct output has no independently generated English source, so assess its adequacy against the case rubric. Do not pretend it has a measured translation-equivalence score.
+For Hindi/Kannada comparisons, name the languages explicitly using `hi kn`. The `direct` arm is a research arm; the normal UI continues to use English-then-translate. Direct output has no independently generated English source, so assess its adequacy against the case rubric. Do not pretend it has a measured translation-equivalence score.
 
 The structured/unstructured arms carry the same normalized observations, source evidence, grounding rules and output instructions. The separate concise option changes output instructions and is not the primary input-format ablation.
 
@@ -120,7 +120,7 @@ The claim parser ignores recognised headings and list markers before sentence sp
 
 Normal generation retains its 800-token output budget and 4096-token context. Translation uses a separate 2048-token budget and 8192-token context. A truncated translation is discarded and retried as complete sentence chunks, with 3072 tokens per chunk and one final 4096-token retry if needed. Translation semantic review uses 1024 output tokens and 8192 context tokens. Output budgets and completion reasons are recorded in metrics. The UI reports specific failure reasons while preserving English.
 
-Regression fixtures replay the two reported English drafts. Fixed model-response fixtures exercise successful retry and exhausted-retry paths for Hindi, Kannada, Tamil and Telugu. These tests establish failure-handling behaviour, **not real language fluency or translation accuracy**.
+Regression fixtures replay the two reported English drafts. Fixed model-response fixtures exercise successful retry and exhausted-retry paths for Hindi and Kannada. These tests establish failure-handling behaviour, **not real language fluency or translation accuracy**.
 
 Run actual local-model checks on the target laptop after updating and restarting the app:
 
@@ -128,7 +128,7 @@ Run actual local-model checks on the target laptop after updating and restarting
 python scripts/check_languages.py --model llama3.2:3b
 ```
 
-The command checks Hindi, Kannada, Tamil and Telugu sequentially, prints each result and saves `reports/language-check.json` after each language. A failed automated check yields exit code 1 and retains the reason. Have fluent speakers review accepted translations; increasing token limits cannot guarantee that a model knows a language.
+The command checks Hindi and Kannada sequentially, prints each result and saves `reports/language-check.json` after each language. A failed automated check yields exit code 1 and retains the reason. Have fluent speakers review accepted translations; increasing token limits cannot guarantee that a model knows a language.
 
 ### Citation and technical-value preservation
 

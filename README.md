@@ -25,7 +25,7 @@ ollama pull llama3.2:3b
 ollama serve
 ```
 
-If Ollama is already running in the desktop app, a second `ollama serve` is unnecessary. Start `python app.py`, choose **Local LLM**, and enter an installed model name. Choose Hindi, Kannada, Tamil or Telugu to translate the screened English advice with the local model. Llama 3.2 is retained from the original prototype; output quality in each language must be evaluated rather than assumed. Use another preinstalled multilingual Ollama model when needed.
+If Ollama is already running in the desktop app, a second `ollama serve` is unnecessary. Start `python app.py`, choose **Local LLM**, and enter an installed model name. Choose Hindi or Kannada to translate the screened English advice with the local model. Llama 3.2 is retained from the original prototype; output quality in each language must be evaluated rather than assumed. Use another preinstalled multilingual Ollama model when needed.
 
 The browser, evidence files and application assets run locally. Model and optional embedding weights must be installed **before** disconnecting the internet. Cloud model tags are rejected. No model weights are included in this repository.
 
@@ -36,7 +36,7 @@ The browser, evidence files and application assets run locally. Model and option
 - Crop-filtered retrieval screens region, season, production system and date metadata. Explicit mismatches/expired sources are excluded and unknown metadata is disclosed. It preserves sources, regional scope and review dates. The default keyword/topic baseline requires no model download. An optional MiniLM + FAISS backend uses cached local model files.
 - Local quantized model inference through Ollama; structured JSON and an unstructured prose input baseline with shared output instructions, plus a separate concise option.
 - Claim-level screening: rules reject unsupported dosages and narrow contradictions; a local-model reviewer assesses paraphrased claims against supplied evidence. Unassessed and unsupported claims are withheld. A failed reviewer falls back to source guidance.
-- Hindi, Kannada, Tamil and Telugu output with number/label/script/unit checks and a local-model semantic assessment of crop names, conditions, negation, warnings and uncertainty. Failed translation is withheld; original English remains visible. These are fallible automated assessments, not human validation.
+- Hindi and Kannada output with number/label/script/unit checks and a local-model semantic assessment of crop names, conditions, negation, warnings and uncertainty. Failed translation is withheld; original English remains visible. These are fallible automated assessments, not human validation.
 - Local web interface, JSON export, CLI and CSV ingestion, including sensor-ID-based suspected stuck/out-of-order detection. Benchmark arms include English-then-translate and research-only direct multilingual generation. Resource monitoring, statistical analysis, reviewer imports and offline probes are included.
 - Tests, CI configuration, blank expert-review forms and validated annotation import, plus documented evaluation limitations.
 

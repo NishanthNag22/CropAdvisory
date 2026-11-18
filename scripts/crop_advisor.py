@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from crop_advisory.engine import advise, AdvisoryError
+from crop_advisory.engine import advise, AdvisoryError, LANGUAGES
 
 def main():
     parser = argparse.ArgumentParser()
@@ -20,7 +20,7 @@ def main():
     parser.add_argument("--calibrated", choices=["true", "false", "unknown"], default="unknown")
     for field in ("rainfall-24h-mm", "forecast-rainfall-mm", "humidity", "max-reading-age-hours"):
         parser.add_argument("--" + field, type=float)
-    parser.add_argument("--language", default="en", choices=["en", "kn", "hi", "ta", "te"])
+    parser.add_argument("--language", default="en", choices=list(LANGUAGES))
     parser.add_argument("--model", default=None)
     parser.add_argument("--mode", default="llm", choices=["llm", "evidence"])
     args = vars(parser.parse_args())

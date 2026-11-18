@@ -11,7 +11,7 @@ from crop_advisory.engine import advise, Ollama, AdvisoryError, LANGUAGES
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--model',default='llama3.2:3b')
-    parser.add_argument('--languages',nargs='+',choices=['hi','kn','ta','te'],default=['hi','kn','ta','te'])
+    parser.add_argument('--languages',nargs='+',choices=[code for code in LANGUAGES if code!='en'],default=[code for code in LANGUAGES if code!='en'])
     parser.add_argument('--output',type=Path,default=Path('reports/language-check.json'))
     args=parser.parse_args()
     payload={'crop':'tomato','moisture':28,'temperature':30,'ph':6.8,'region':'Tamil Nadu, India',
