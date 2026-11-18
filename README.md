@@ -124,3 +124,13 @@ The UI's model field can override `OLLAMA_MODEL`. The app binds to localhost. In
 - [Paper-to-implementation coverage](docs/PAPER_IMPLEMENTATION.md)
 
 Automated support judgements and translation checks can fail. They are not proof of agronomic correctness. Review claims with an agronomist and translations with a fluent speaker before real-world decisions.
+
+### Check regional-language output on your laptop
+
+After pulling updates, stop the old web server with Ctrl+C and restart `python app.py`. Hard-refresh the browser with Ctrl+F5. To check all four regional languages using your actual Ollama model:
+
+```bash
+python scripts/check_languages.py --model llama3.2:3b
+```
+
+The app retries truncated translations with sentence chunks and preserves completed claim assessments when a neighbouring review fails. English remains available if regional output cannot be validated, with the exact failure reason shown. Test fixtures are not evidence of actual multilingual quality; inspect the saved local results and obtain fluent-speaker review.

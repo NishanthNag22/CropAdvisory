@@ -1,0 +1,30 @@
+[
+  {
+    "label": "structured",
+    "draft": "**Observations**\n\n* The tomato crop is in the flowering stage.\n* The soil pH is 6.8, which is within the recommended range of 6.5 to 7.5 for tomato cultivation in Tamil Nadu, India.\n* The volumetric water content (VWC) is 28%, but the sensor quality is unknown due to unknown timestamps and calibration.\n* The air temperature is 30 °C.\n* The weather context is not available due to unknown rainfall, forecast rainfall, humidity, and weather source.\n\n**Suggested checks**\n\n* Check the local soil-test result to confirm the soil pH and determine if any pH correction is needed.\n* Check the actual soil moisture and drainage before changing irrigation.\n* Consider the growing conditions and adjust the irrigation schedule accordingly.\n\n**Evidence**\n\n* Evidence 1: Tamil Nadu Agricultural University lists a soil pH range of 6.5 to 7.5 for tomato cultivation in its general tomato soil guidance.\n* Evidence 2: TNAU notes that maintaining an even water supply is important for tomatoes.\n\n**Limitations**\n\n* The sensor quality for moisture, temperature, and pH is unknown due to unknown timestamps and calibration.\n* The weather context is not available due to unknown rainfall, forecast rainfall, humidity, and weather source.\n* Temperature guidance is absent from this knowledge base.\n* The moisture target cannot be determined due to unknown sensor quality.\n* The applicability of the recommendations is unconfirmed for the specific region and production system.",
+    "evidence": [
+      {
+        "guidance": "Tamil Nadu Agricultural University lists a soil pH range of 6.5 to 7.5 for tomato cultivation in its general tomato soil guidance. Check the local soil-test result before deciding whether any pH correction is needed.",
+        "topic": "soil_pH"
+      },
+      {
+        "guidance": "Tomatoes need careful irrigation with sufficient water at appropriate times. TNAU notes that maintaining an even water supply is important. Check actual soil moisture and drainage before changing irrigation; the appropriate schedule depends on growing conditions.",
+        "topic": "soil_moisture"
+      }
+    ]
+  },
+  {
+    "label": "concise",
+    "draft": "Based on the provided evidence, two short checks before changing tomato irrigation are:\n\n1. Check actual soil moisture levels, as TNAU notes that maintaining an even water supply is important for tomatoes (Evidence 1).\n2. Check the local soil pH level, as TNAU lists a recommended pH range of 6.5 to 7.5 for tomato cultivation (Evidence 2).\n\nThese checks are applicable for tomato cultivation in Tamil Nadu, India, but the season and production system are unknown, and the applicability of these checks needs to be confirmed for the specific growing conditions.",
+    "evidence": [
+      {
+        "guidance": "Tomatoes need careful irrigation with sufficient water at appropriate times. TNAU notes that maintaining an even water supply is important. Check actual soil moisture and drainage before changing irrigation; the appropriate schedule depends on growing conditions.",
+        "topic": "soil_moisture"
+      },
+      {
+        "guidance": "Tamil Nadu Agricultural University lists a soil pH range of 6.5 to 7.5 for tomato cultivation in its general tomato soil guidance. Check the local soil-test result before deciding whether any pH correction is needed.",
+        "topic": "soil_pH"
+      }
+    ]
+  }
+]

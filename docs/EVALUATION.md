@@ -2,7 +2,7 @@
 
 ## Verified software checks
 
-The expanded implementation passes **114 automated tests**. Tests cover measurement conversion and quality, source applicability, translation withholding, prompt representation, resource reporting, statistics, dataset provenance, offline client guards, and HTTP integration.
+The expanded implementation passes **130 automated tests** after the multilingual recovery fixes. Tests cover measurement conversion and quality, source applicability, translation withholding, prompt representation, resource reporting, statistics, dataset provenance, offline client guards, and HTTP integration.
 
 An evidence-only smoke run completed all **13 cases in the evaluation split**, for both structured and unstructured configuration labels. It retrieved the expected topics or abstained as specified. Evidence-only mode makes no LLM call: these runs test plumbing and source selection, **not prompt quality or agronomic accuracy**.
 
@@ -113,3 +113,19 @@ python scripts/offline_check.py --mode llm --model crop-q4 --require-network-dis
 ```
 
 The client guard prevents non-loopback TCP connections and external DNS in the Python process. It **does not isolate Ollama**. The strict option also requires no active non-loopback interfaces as reported by psutil and fails if adapters cannot be inspected. For the paper's real offline demonstration, disconnect networking or use OS isolation for both processes after installing all weights and local knowledge. Capture the target-machine state and results. Do not call a successful client guard a complete hardware offline experiment.
+
+## Recovery checks for reported multilingual failures
+
+The claim parser ignores recognised headings and list markers before sentence splitting. Reviewer calls contain at most three claims, with a 2048-token output budget and 8192-token context. Missing/invalid claim assessments are retried once individually; completed valid assessments survive failed neighbours. Unresolved claims remain withheld.
+
+Normal generation retains its 800-token output budget and 4096-token context. Translation uses a separate 2048-token budget and 8192-token context. A truncated translation is discarded and retried as complete sentence chunks, with 3072 tokens per chunk and one final 4096-token retry if needed. Translation semantic review uses 1024 output tokens and 8192 context tokens. Output budgets and completion reasons are recorded in metrics. The UI reports specific failure reasons while preserving English.
+
+Regression fixtures replay the two reported English drafts. Fixed model-response fixtures exercise successful retry and exhausted-retry paths for Hindi, Kannada, Tamil and Telugu. These tests establish failure-handling behaviour, **not real language fluency or translation accuracy**.
+
+Run actual local-model checks on the target laptop after updating and restarting the app:
+
+```bash
+python scripts/check_languages.py --model llama3.2:3b
+```
+
+The command checks Hindi, Kannada, Tamil and Telugu sequentially, prints each result and saves `reports/language-check.json` after each language. A failed automated check yields exit code 1 and retains the reason. Have fluent speakers review accepted translations; increasing token limits cannot guarantee that a model knows a language.
