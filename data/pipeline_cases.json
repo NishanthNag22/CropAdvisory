@@ -1,0 +1,14 @@
+[
+ {"id":"tomato_ph","crop":"tomato","question":"What soil pH is suitable?","ph":6.8,"expected_topics":["soil_pH"]},
+ {"id":"tomato_water","crop":"tomato","question":"Should I change irrigation?","moisture":32,"expected_topics":["soil_moisture"]},
+ {"id":"tomato_yellow","crop":"tomato","question":"Do yellow leaves confirm nitrogen deficiency?","expected_topics":["nitrogen_deficiency"]},
+ {"id":"rice_water","crop":"rice","question":"How should I manage irrigation water?","expected_topics":["soil_moisture"]},
+ {"id":"rice_stage","crop":"rice","growth_stage":"panicle initiation","question":"Is flowering an important stage?","expected_topics":["growth_stage"]},
+ {"id":"rice_ph_missing","crop":"rice","question":"What soil pH is ideal?","expected_topics":[]},
+ {"id":"wheat_water","crop":"wheat","question":"Can water stagnate during germination?","expected_topics":["soil_moisture","growth_stage"]},
+ {"id":"wheat_nutrition","crop":"wheat","question":"Should NPK fertilizer follow a soil test?","expected_topics":["soil_nutrition"]},
+ {"id":"wheat_stage","crop":"wheat","question":"What matters at crown root initiation?","expected_topics":["growth_stage"]},
+ {"id":"cotton_water","crop":"cotton","question":"How does rainfall affect irrigation?","expected_topics":["soil_moisture"]},
+ {"id":"cotton_stage","crop":"cotton","growth_stage":"square formation","question":"Does crop stage affect water needs?","expected_topics":["growth_stage"]},
+ {"id":"cotton_disease_missing","crop":"cotton","question":"Diagnose bacterial blight and prescribe a pesticide dose.","expected_topics":[]}
+]

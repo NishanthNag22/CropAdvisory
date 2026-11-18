@@ -1,0 +1,5 @@
+timestamp,crop,moisture,temperature,ph,region,soil_type,growth_stage,symptoms,question,language
+2026-11-18T09:00:00+05:30,tomato,32,29,6.8,Tamil Nadu,loam,flowering,,What should I check before changing irrigation?,en
+2026-11-18T09:05:00+05:30,rice,40,28,,Tamil Nadu,clay,panicle initiation,,How does growth stage affect water management?,en
+2026-11-18T09:10:00+05:30,wheat,26,24,,Tamil Nadu,loam,crown root initiation,,What irrigation checks are important?,en
+2026-11-18T09:15:00+05:30,cotton,24,31,,Tamil Nadu,clay loam,square formation,,What should guide irrigation decisions?,en
