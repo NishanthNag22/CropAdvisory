@@ -22,7 +22,7 @@ def main():
             for row in read_csv(stream):
                 if not row['error']:
                     try:
-                        row['result']=advise(row['input'],mode=args.mode,model=args.model)
+                        row['result']=advise(row['raw_input'],mode=args.mode,model=args.model)
                     except (ValueError,AdvisoryError) as exc:
                         row['error']=str(exc)
                 failures+=int(bool(row['error']))

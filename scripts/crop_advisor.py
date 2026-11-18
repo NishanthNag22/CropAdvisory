@@ -9,18 +9,23 @@ from crop_advisory.engine import advise, AdvisoryError
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--crop", choices=["tomato", "rice", "wheat", "cotton"], default="tomato")
-    for name in ("region", "soil-type", "growth-stage", "symptoms"):
+    for name in ("region", "soil-type", "growth-stage", "symptoms", "season", "production-system", "timestamp", "weather-timestamp", "weather-source", "weather-notes"):
         parser.add_argument("--" + name, default="")
     parser.add_argument("--question")
     parser.add_argument("--moisture", type=float)
     parser.add_argument("--temperature", type=float)
     parser.add_argument("--ph", type=float)
+    parser.add_argument("--temperature-unit", default="°C")
+    parser.add_argument("--moisture-unit", default="% VWC")
+    parser.add_argument("--calibrated", choices=["true", "false", "unknown"], default="unknown")
+    for field in ("rainfall-24h-mm", "forecast-rainfall-mm", "humidity", "max-reading-age-hours"):
+        parser.add_argument("--" + field, type=float)
     parser.add_argument("--language", default="en", choices=["en", "kn", "hi", "ta", "te"])
     parser.add_argument("--model", default=None)
     parser.add_argument("--mode", default="llm", choices=["llm", "evidence"])
     args = vars(parser.parse_args())
     if args["question"] is None:
-        args["question"] = input("Ask your tomato-growing question: ").strip()
+        args["question"] = input("Ask your crop-growing question: ").strip()
     try:
         result = advise(args, model=args["model"], mode=args["mode"])
         print(json.dumps(result, ensure_ascii=False, indent=2))
